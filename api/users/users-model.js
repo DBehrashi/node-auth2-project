@@ -1,10 +1,12 @@
 const db = require('../../data/db-config.js');
 
-function find() {
+async function find() {
+  const result = db('users as u')
+    .join('roles as r', 'u.role_id', 'r.role_id')
+    .select('user_id', 'username', 'role_name')
   /**
     You will need to join two tables.
     Resolves to an ARRAY with all users.
-
     [
       {
         "user_id": 1,
@@ -18,13 +20,18 @@ function find() {
       }
     ]
    */
+  return result;
 }
 
-function findBy(filter) {
+async function findBy(filter) {
+  const result = await db('users as u')
+    .join('roles as r', 'u.role_id', 'r.role_id')
+    .select('user_id', 'username', 'password', 'role_name')
+    .where(filter)
+    
   /**
     You will need to join two tables.
     Resolves to an ARRAY with all users that match the filter condition.
-
     [
       {
         "user_id": 1,
@@ -34,13 +41,20 @@ function findBy(filter) {
       }
     ]
    */
+  return result
 }
 
-function findById(user_id) {
+async function findById(user_id) {
+  const result = await db('users as u')
+    .join('roles as r', 'u.role_id', 'r.role_id')
+    .select('user_id', 'username', 'role_name')
+    .where('user_id', user_id)
+    .first()
+
+    return result
   /**
     You will need to join two tables.
     Resolves to the user with the given user_id.
-
     {
       "user_id": 2,
       "username": "sue",
@@ -53,14 +67,11 @@ function findById(user_id) {
   Creating a user requires a single insert (into users) if the role record with the given
   role_name already exists in the db, or two inserts (into roles and then into users)
   if the given role_name does not exist yet.
-
   When an operation like creating a user involves inserts to several tables,
   we want the operation to succeed or fail as a whole. It would not do to
   insert a new role record and then have the insertion of the user fail.
-
   In situations like these we use transactions: if anything inside the transaction
   fails, all the database changes in it are rolled back.
-
   {
     "user_id": 7,
     "username": "anna",
